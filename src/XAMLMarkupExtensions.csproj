@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 	<PropertyGroup>
-		<TargetFrameworks>net40;net452;net462;net472;net48;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
+		<TargetFrameworks>net40;net452;net462;net472;net48;netcoreapp3.1</TargetFrameworks>
 		<UseWPF>True</UseWPF>
 		<AutoGenerateBindingRedirects Condition="!$(TargetFramework.StartsWith('netcore'))">true</AutoGenerateBindingRedirects>
 		<AssemblyTitle>XAMLMarkupExtensions</AssemblyTitle>
@@ -42,23 +42,28 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="Exists('$(SolutionDir)\fullkey.snk')">
-		<SignAssembly>true</SignAssembly>
-		<DelaySign>false</DelaySign>
+	<PropertyGroup Condition="Exists('$(SolutionDir)\src\fullkey.snk')">
 		<PublicSign>false</PublicSign>
 		<AssemblyOriginatorKeyFile>fullkey.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(UnSigned)' == 'true'">
+		<SignAssembly>false</SignAssembly>
+		<PublicSign>false</PublicSign>
+		<AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+		<PackageId>$(AssemblyName).UnSigned</PackageId>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<None Include="..\LICENSE" Pack="true" PackagePath=""/>
+		<None Include="..\LICENSE" Pack="true" PackagePath="" />
 		<None Remove="packages.lock.json" />
 		<None Remove="public.snk" />
 	</ItemGroup>
 
 	<!--PackageReference for all framworks-->
 	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-		<PackageReference Include="GitVersionTask" Version="5.5.1" PrivateAssets="All" />
+		<PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
 	<Target Name="PublishToNugetWithAPIKey" AfterTargets="GenerateNuspec">

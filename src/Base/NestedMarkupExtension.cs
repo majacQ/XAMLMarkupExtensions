@@ -101,6 +101,10 @@ namespace XAMLMarkupExtensions.Base
         /// <summary>
         /// An action that is called when the last target is unbound.
         /// </summary>
+        /// <remarks>
+        /// This method can be called without <see cref="OnFirstTargetAdded" /> before
+        /// if extension disposed without adding targets.
+        /// </remarks>
         protected virtual void OnLastTargetRemoved()
         {
             EndpointReachedEvent.RemoveListener(rootObjectHashCode, this);
@@ -195,9 +199,9 @@ namespace XAMLMarkupExtensions.Base
             Type targetPropertyType = null;
             object overriddenResult = null;
 
-            // If target object is a Binding, extension set at Value.
+            // If target object is a Binding and extension set at Value.
             // Return Binding which work with BindingValueProvider.
-            if (targetObject is Setter setter)
+            if (targetObject is Setter setter && targetProperty is PropertyInfo spi && spi.Name == nameof(Setter.Value))
             {
                 targetObject = new BindingValueProvider();
                 targetProperty = BindingValueProvider.ValueProperty;
@@ -211,9 +215,9 @@ namespace XAMLMarkupExtensions.Base
                     Mode = BindingMode.TwoWay
                 };
             }
-            // If target object is a Binding, extension set at Source.
+            // If target object is a Binding and extension set at Source.
             // Reconfigure existing binding and return BindingValueProvider.
-            else if (targetObject is Binding binding)
+            else if (targetObject is Binding binding && targetProperty is PropertyInfo bpi && bpi.Name == nameof(Binding.Source))
             {
                 binding.Path = new PropertyPath(nameof(BindingValueProvider.Value));
                 binding.Mode = BindingMode.TwoWay;
@@ -585,12 +589,8 @@ namespace XAMLMarkupExtensions.Base
                 ObjectDependencyManager.CleanUp(this);
 
                 // Clean all targets.
-                var targetObjectsCount = targetObjects.Count;
                 targetObjects.Clear();
-
-                // Notify if targets was not empty.
-                if (targetObjectsCount > 0)
-                    OnLastTargetRemoved();
+                OnLastTargetRemoved();
             }
         }
 
